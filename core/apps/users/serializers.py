@@ -1,3 +1,4 @@
+import core.apps.users.serializers
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -32,3 +33,47 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+    class UserDetailSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            fields =('usrname', 'first_name', 'last_name', 'email', 'phone_number')
+
+
+class PhoneTokenObtainPairSerializer(TokenObtainPairSerializer):
+    # Override the username_field so that it uses phone_number instead of username.
+    username_field ='phone_number'
+
+    def validate(self, attrs):
+        phone_number = attrs.get('phone_number')
+        password = attrs.get('password')
+    
+        if phone_number and password:
+             # Ensure that the payload has the phone_number key.
+            attrs[self.username_field] = phone_number
+        else:
+            raise serializers.ValidationError('Must include "phone_number" and "password".')
+        
+         # Call the superclass to validate and generate tokens.
+        data = super().validate(attrs)
+
+        # Calculate expires_in (remaining seconds until token expiration)
+        exp_timestamp = self.get_token(self.user)['exp']
+        current_timestamp = int(timezone.now().timestamp())
+        data['expires_in'] = exp_timestamp - current_timestamp
+
+        return 
+    
+    class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+        def validate(self, attrs):
+            refresh_token = self.initial_data.get("refresh")
+            refresh_obj = RefreshToken(refresh_token)
+
+            new_access_token = refresh_obj.access_token
+            data = {"access": str(new_access_token)}
+
+            exp_timestamp = new_access_token["exp"]
+            current_timestamp = int(timezone.now().timestamp())
+            data["expires_in"] = exp_timestamp - current_timestamp
+
+            return data
