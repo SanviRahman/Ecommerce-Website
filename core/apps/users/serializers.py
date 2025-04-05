@@ -34,10 +34,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
-    class UserDetailSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = User
-            fields =('usrname', 'first_name', 'last_name', 'email', 'phone_number')
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields =('usrname', 'first_name', 'last_name', 'email', 'phone_number')
 
 
 class PhoneTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -64,16 +64,16 @@ class PhoneTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         return 
     
-    class CustomTokenRefreshSerializer(TokenRefreshSerializer):
-        def validate(self, attrs):
-            refresh_token = self.initial_data.get("refresh")
-            refresh_obj = RefreshToken(refresh_token)
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        refresh_token = self.initial_data.get("refresh")
+        refresh_obj = RefreshToken(refresh_token)
 
-            new_access_token = refresh_obj.access_token
-            data = {"access": str(new_access_token)}
+        new_access_token = refresh_obj.access_token
+        data = {"access": str(new_access_token)}
 
-            exp_timestamp = new_access_token["exp"]
-            current_timestamp = int(timezone.now().timestamp())
-            data["expires_in"] = exp_timestamp - current_timestamp
+        exp_timestamp = new_access_token["exp"]
+        current_timestamp = int(timezone.now().timestamp())
+        data["expires_in"] = exp_timestamp - current_timestamp
 
-            return data
+        return data

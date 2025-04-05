@@ -141,7 +141,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=35),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
+AUTHENTICATION_BACKENDS = [
+    'core.apps.users.backends.PhoneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]

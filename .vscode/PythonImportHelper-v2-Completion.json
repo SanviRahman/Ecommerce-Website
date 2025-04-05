@@ -24,6 +24,22 @@
         "documentation": {}
     },
     {
+        "label": "path",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
+        "label": "include",
+        "importPath": "django.urls",
+        "description": "django.urls",
+        "isExtraImport": true,
+        "detail": "django.urls",
+        "documentation": {}
+    },
+    {
         "label": "generics",
         "importPath": "rest_framework",
         "description": "rest_framework",
@@ -45,6 +61,14 @@
         "description": "rest_framework",
         "isExtraImport": true,
         "detail": "rest_framework",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_model",
+        "importPath": "django.contrib.auth",
+        "description": "django.contrib.auth",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth",
         "documentation": {}
     },
     {
@@ -137,6 +161,14 @@
         "documentation": {}
     },
     {
+        "label": "admin",
+        "importPath": "django.contrib",
+        "description": "django.contrib",
+        "isExtraImport": true,
+        "detail": "django.contrib",
+        "documentation": {}
+    },
+    {
         "label": "UserAdmin",
         "importPath": "django.contrib.auth.admin",
         "description": "django.contrib.auth.admin",
@@ -158,6 +190,14 @@
         "description": "django.apps",
         "isExtraImport": true,
         "detail": "django.apps",
+        "documentation": {}
+    },
+    {
+        "label": "ModelBackend",
+        "importPath": "django.contrib.auth.backends",
+        "description": "django.contrib.auth.backends",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth.backends",
         "documentation": {}
     },
     {
@@ -358,9 +398,18 @@
     {
         "label": "urlpatterns",
         "kind": 5,
+        "importPath": "core.api.v1.urls",
+        "description": "core.api.v1.urls",
+        "peekOfCode": "urlpatterns = [\n    path('users/', include('core.api.v1.users.urls')),\n]",
+        "detail": "core.api.v1.urls",
+        "documentation": {}
+    },
+    {
+        "label": "urlpatterns",
+        "kind": 5,
         "importPath": "core.api.urls",
         "description": "core.api.urls",
-        "peekOfCode": "urlpatterns = [\n    path('admin/', admin.site.urls),\n     path('api/v1/', include('core.api.v1.urls')),\n]",
+        "peekOfCode": "urlpatterns = [\n    path('admin/', admin.site.urls),\n    path('api/v1/', include('core.api.v1.urls')),\n]",
         "detail": "core.api.urls",
         "documentation": {}
     },
@@ -380,6 +429,15 @@
         "description": "core.apps.users.apps",
         "peekOfCode": "class UsersConfig(AppConfig):\n    default_auto_field = 'django.db.models.BigAutoField'\n    name = 'core.apps.users'",
         "detail": "core.apps.users.apps",
+        "documentation": {}
+    },
+    {
+        "label": "PhoneBackend",
+        "kind": 6,
+        "importPath": "core.apps.users.backend",
+        "description": "core.apps.users.backend",
+        "peekOfCode": "class PhoneBackend(ModelBackend):\n    def authenticate(self, request, phone_number=None, password=None, *args, **kwargs):\n        User = get_user_model()\n        # If phone_number is not provided, fall back to 'username' from kwargs.\n        if phone_number is None:\n            phone_number = kwargs.get('username', None)\n        try:\n            user = User.objects.get(phone_number=phone_number)\n        except User.DoesNotExist:\n            return None",
+        "detail": "core.apps.users.backend",
         "documentation": {}
     },
     {
@@ -410,11 +468,29 @@
         "documentation": {}
     },
     {
+        "label": "UserDetailSerializer",
+        "kind": 6,
+        "importPath": "core.apps.users.serializers",
+        "description": "core.apps.users.serializers",
+        "peekOfCode": "class UserDetailSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = User\n        fields =('usrname', 'first_name', 'last_name', 'email', 'phone_number')\nclass PhoneTokenObtainPairSerializer(TokenObtainPairSerializer):\n    # Override the username_field so that it uses phone_number instead of username.\n    username_field ='phone_number'\n    def validate(self, attrs):\n        phone_number = attrs.get('phone_number')\n        password = attrs.get('password')",
+        "detail": "core.apps.users.serializers",
+        "documentation": {}
+    },
+    {
         "label": "PhoneTokenObtainPairSerializer",
         "kind": 6,
         "importPath": "core.apps.users.serializers",
         "description": "core.apps.users.serializers",
         "peekOfCode": "class PhoneTokenObtainPairSerializer(TokenObtainPairSerializer):\n    # Override the username_field so that it uses phone_number instead of username.\n    username_field ='phone_number'\n    def validate(self, attrs):\n        phone_number = attrs.get('phone_number')\n        password = attrs.get('password')\n        if phone_number and password:\n             # Ensure that the payload has the phone_number key.\n            attrs[self.username_field] = phone_number\n        else:",
+        "detail": "core.apps.users.serializers",
+        "documentation": {}
+    },
+    {
+        "label": "CustomTokenRefreshSerializer",
+        "kind": 6,
+        "importPath": "core.apps.users.serializers",
+        "description": "core.apps.users.serializers",
+        "peekOfCode": "class CustomTokenRefreshSerializer(TokenRefreshSerializer):\n    def validate(self, attrs):\n        refresh_token = self.initial_data.get(\"refresh\")\n        refresh_obj = RefreshToken(refresh_token)\n        new_access_token = refresh_obj.access_token\n        data = {\"access\": str(new_access_token)}\n        exp_timestamp = new_access_token[\"exp\"]\n        current_timestamp = int(timezone.now().timestamp())\n        data[\"expires_in\"] = exp_timestamp - current_timestamp\n        return data",
         "detail": "core.apps.users.serializers",
         "documentation": {}
     },
@@ -630,7 +706,7 @@
         "kind": 5,
         "importPath": "core.ostad.settings",
         "description": "core.ostad.settings",
-        "peekOfCode": "DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'\nAUTH_USER_MODEL = 'users.User'\nREST_FRAMEWORK = {\n    'DEFAULT_AUTHENTICATION_CLASSES': (\n        'rest_framework_simplejwt.authentication.JWTAuthentication',\n    )\n}\nSIMPLE_JWT = {\n    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=35),\n    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),",
+        "peekOfCode": "DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'\nAUTH_USER_MODEL = 'users.User'\nREST_FRAMEWORK = {\n    'DEFAULT_AUTHENTICATION_CLASSES': (\n        'rest_framework_simplejwt.authentication.JWTAuthentication',\n    )\n}\nSIMPLE_JWT = {\n    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),\n    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),",
         "detail": "core.ostad.settings",
         "documentation": {}
     },
@@ -639,7 +715,7 @@
         "kind": 5,
         "importPath": "core.ostad.settings",
         "description": "core.ostad.settings",
-        "peekOfCode": "AUTH_USER_MODEL = 'users.User'\nREST_FRAMEWORK = {\n    'DEFAULT_AUTHENTICATION_CLASSES': (\n        'rest_framework_simplejwt.authentication.JWTAuthentication',\n    )\n}\nSIMPLE_JWT = {\n    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=35),\n    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),\n}",
+        "peekOfCode": "AUTH_USER_MODEL = 'users.User'\nREST_FRAMEWORK = {\n    'DEFAULT_AUTHENTICATION_CLASSES': (\n        'rest_framework_simplejwt.authentication.JWTAuthentication',\n    )\n}\nSIMPLE_JWT = {\n    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),\n    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),\n}",
         "detail": "core.ostad.settings",
         "documentation": {}
     },
@@ -648,7 +724,7 @@
         "kind": 5,
         "importPath": "core.ostad.settings",
         "description": "core.ostad.settings",
-        "peekOfCode": "REST_FRAMEWORK = {\n    'DEFAULT_AUTHENTICATION_CLASSES': (\n        'rest_framework_simplejwt.authentication.JWTAuthentication',\n    )\n}\nSIMPLE_JWT = {\n    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=35),\n    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),\n}",
+        "peekOfCode": "REST_FRAMEWORK = {\n    'DEFAULT_AUTHENTICATION_CLASSES': (\n        'rest_framework_simplejwt.authentication.JWTAuthentication',\n    )\n}\nSIMPLE_JWT = {\n    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),\n    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),\n}\nAUTHENTICATION_BACKENDS = [",
         "detail": "core.ostad.settings",
         "documentation": {}
     },
@@ -657,7 +733,16 @@
         "kind": 5,
         "importPath": "core.ostad.settings",
         "description": "core.ostad.settings",
-        "peekOfCode": "SIMPLE_JWT = {\n    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=35),\n    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),\n}",
+        "peekOfCode": "SIMPLE_JWT = {\n    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),\n    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),\n}\nAUTHENTICATION_BACKENDS = [\n    'core.apps.users.backends.PhoneBackend',\n    'django.contrib.auth.backends.ModelBackend',\n]",
+        "detail": "core.ostad.settings",
+        "documentation": {}
+    },
+    {
+        "label": "AUTHENTICATION_BACKENDS",
+        "kind": 5,
+        "importPath": "core.ostad.settings",
+        "description": "core.ostad.settings",
+        "peekOfCode": "AUTHENTICATION_BACKENDS = [\n    'core.apps.users.backends.PhoneBackend',\n    'django.contrib.auth.backends.ModelBackend',\n]",
         "detail": "core.ostad.settings",
         "documentation": {}
     },
